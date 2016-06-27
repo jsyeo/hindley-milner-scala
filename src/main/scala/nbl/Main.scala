@@ -1,6 +1,7 @@
 package nbl
 
 import fastparse.all._
+import fastparse.core.Parsed.Success
 import nbl.Main.Expr._
 import nbl.Main.Operator.{Add, Divide, Minus, Multiply}
 
@@ -17,7 +18,7 @@ object Main {
 
     case class Let(identifier: Identifier, expr: Expr, body: Expr) extends Expr
 
-    case class Identifier(variable: String) extends Expr
+    case class Identifier(id: String) extends Expr
 
     sealed trait Value
 
@@ -40,6 +41,7 @@ object Main {
     case object Divide extends Operator
 
   }
+
 
   def main(args: Array[String]): Unit = {
     def transform(tree: (Expr, Seq[(String, Expr)])): Expr = {
@@ -68,11 +70,23 @@ object Main {
     })
     lazy val expr: P[Expr] = P(addSub | let)
 
-    println(expr.parse("1+1"))
-    println(expr.parse("1"))
-    println(expr.parse("1+5*2"))
-    println(expr.parse("let x = 2 in x*3"))
+    def evalBinOp(expr: BinOp, env: Map[Identifier, Int]): Int = expr.operator match {
+      case Add => eval(expr.left, env) + eval(expr.right, env)
+      case Minus => eval(expr.left, env) - eval(expr.right, env)
+      case Multiply => eval(expr.left, env) * eval(expr.right, env)
+      case Divide => eval(expr.left, env) / eval(expr.right, env)
+    }
 
-    def eval(expr: Expr, env: Map[Identifier, ])
+    def eval(expr: Expr, env: Map[Identifier, Int]): Int = {
+      expr match {
+        case (expr: BinOp)  => evalBinOp(expr, env)
+        case (expr: Let) => eval(expr.body, env.updated(expr.identifier, eval(expr.expr, env)))
+        case (expr: Integer) => expr.value
+        case (expr: Identifier) => env.get(expr).get
+      }
+    }
+
+    val Success(ast, _) = expr.parse("let x = 2 in let y = 3 in x*y")
+    assert(eval(ast, Map()) == 6)
   }
 }
