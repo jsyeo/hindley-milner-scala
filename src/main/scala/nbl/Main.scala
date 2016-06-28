@@ -30,8 +30,6 @@ object Main {
 
     case class Identifier(id: String) extends Expr
 
-    sealed trait Value
-
     case class Integer(value: Int) extends Expr
 
     case class Boolean(value: java.lang.Boolean) extends Expr
@@ -72,6 +70,7 @@ object Main {
     val keywords = Set("let", "if", "then", "else", "true", "false")
     val identifier: P[Identifier] = P(CharIn('a' to 'z').rep(1).!.filter(!keywords.contains(_)).map(x => Identifier(x)))
     val bool: P[Boolean] = P("true" | "false").!.map(b => Boolean(b.equals("true")))
+
     lazy val parens: P[Expr] = P("(" ~/ simple_exp ~ ")")
     lazy val simple_exp: P[Expr] = P(number | bool | parens | identifier)
 
