@@ -43,6 +43,8 @@ object Main {
 
     case class FunApply(fun: Expr, arg: Expr) extends Expr
 
+    case class LetRec(identifier: Identifier, fun: Fun, body: Expr) extends Expr
+
   }
 
   sealed trait Operator
@@ -88,13 +90,15 @@ object Main {
     lazy val addSub: P[Expr] = P(divMul ~ (CharIn("+-").! ~/ divMul).rep).map(transform)
     lazy val equal: P[Expr] = P(addSub ~ ("=".! ~/ addSub).rep).map(transform)
 
-    lazy val let: P[Expr] = P("let" ~/ sp ~ identifier ~ sp ~ "=" ~ sp ~ expr ~ sp ~ "in" ~ sp ~ expr).map(e =>
+    lazy val let: P[Expr] = P("let" ~ sp ~ identifier ~ sp ~ "=" ~ sp ~ expr ~ sp ~ "in" ~ sp ~ expr).map(e =>
       Let(e._1, e._2, e._3))
+    lazy val letRec: P[Expr] = P("letrec" ~/ sp ~ identifier ~ sp ~ "=" ~ sp ~ fun ~ sp ~ "in" ~ sp ~ expr).map(e =>
+      LetRec(e._1, e._2, e._3))
     lazy val ifElse = P("if" ~/ sp ~ expr ~ sp ~ "then" ~ sp ~ expr ~ sp ~ "else" ~ sp ~ expr).map(e =>
       IfElse(e._1, e._2, e._3))
     lazy val fun = P("fun" ~/ sp ~ identifier ~ sp ~ "->" ~ sp ~ expr).map(e => Fun(e._1, e._2))
     lazy val funApply = P(simple_exp ~ "(" ~ expr ~ ")").map(e => FunApply(e._1, e._2))
-    lazy val expr: P[Expr] = P(funApply | fun | let | ifElse | equal)
+    lazy val expr: P[Expr] = P(funApply | fun | let | letRec | ifElse | equal)
 
     def evalBinOp(expr: BinOp, env: Map[Identifier, Value]): Value = {
       val (left, right) = (eval(expr.left, env), eval(expr.right, env))
@@ -152,5 +156,7 @@ object Main {
     val result3: Value = eval(ast3, Map())
     assert(result3 == Value.Integer(10))
 
+    val Success(ast4, _) = expr.parse("letrec f = fun x -> f(x) in f(1)")
+    assert(LetRec(Identifier("f"), Fun(Identifier("x"), FunApply(Identifier("f"), Identifier("x"))), FunApply(Identifier("f"), Integer(1))) == ast4)
   }
 }
