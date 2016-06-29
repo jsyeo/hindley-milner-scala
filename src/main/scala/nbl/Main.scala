@@ -147,5 +147,10 @@ object Main {
     val Success(ast2, _) = expr.parse("let comp = fun f -> fun g -> fun x -> f(g(x)) in let f = fun x -> x*x in let fp = (comp(f))(f) in fp(9)")
     val result2: Value = eval(ast2, Map())
     assert(result2 == Value.Integer(6561))
+
+    val Success(ast3, _) = expr.parse("if 3-2=4-3 then 10 else 0")
+    val result3: Value = eval(ast3, Map())
+    assert(result3 == Value.Integer(10))
+
   }
 }
