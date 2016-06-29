@@ -1,6 +1,6 @@
 package nbl
 
-import fastparse.core.Parsed.{Failure, Success}
+import fastparse.core.Parsed.Success
 import nbl.Ast.Expr._
 import nbl.Ast.Operator.{Add, Equal, Multiply}
 import org.scalatest.FunSuite
