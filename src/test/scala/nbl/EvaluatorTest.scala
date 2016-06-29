@@ -8,6 +8,11 @@ import org.scalatest._
   * Created by nos on 6/29/16.
   */
 class EvaluatorTest extends FunSuite {
+  test("Less than expression") {
+    val Success(ast, _) = Parser.parse("3-1<1+2")
+    assert(Evaluator.eval(ast, Map()) == Value.Boolean(true))
+  }
+
   test("Nested let expression") {
     val Success(ast, _) = Parser.parse("let x = 1+1 in let y = x+1 in 1+x*y")
     assert(Evaluator.eval(ast, Map()) == Value.Integer(7))
