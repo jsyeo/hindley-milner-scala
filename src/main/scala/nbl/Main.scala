@@ -2,7 +2,6 @@ package nbl
 
 import fastparse.all._
 import fastparse.core.Parsed.Success
-import nbl.Main.Expr
 import nbl.Main.Expr._
 import nbl.Main.Operator.{Add, _}
 import nbl.Main.Value.Closure
