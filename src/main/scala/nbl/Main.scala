@@ -75,7 +75,7 @@ object Main {
 
     val sp = P(CharIn(" \n"))
     val number: P[Expr] = P(CharIn('0' to '9').rep(1).!.map(x => Integer(x.toInt)))
-    val keywords = Set("let", "if", "then", "else", "true", "false")
+    val keywords = Set("let", "if", "then", "else", "true", "false", "fun")
     val identifier: P[Identifier] = P(CharIn('a' to 'z').rep(1).!.filter(!keywords.contains(_)).map(x => Identifier(x)))
     val bool: P[Boolean] = P("true" | "false").!.map(b => Boolean(b.equals("true")))
 
