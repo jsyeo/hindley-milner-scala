@@ -58,6 +58,8 @@ object Main {
 
     case object Divide extends Operator
 
+    case object Equal extends Operator
+
   }
 
 
@@ -69,6 +71,7 @@ object Main {
         case "-" => BinOp(Minus, left, right)
         case "*" => BinOp(Multiply, left, right)
         case "/" => BinOp(Divide, left, right)
+        case "=" => BinOp(Equal, left, right)
       }
       }
     }
@@ -84,6 +87,7 @@ object Main {
 
     lazy val divMul: P[Expr] = P(simple_exp ~ (CharIn("*/").! ~/ simple_exp).rep).map(transform)
     lazy val addSub: P[Expr] = P(divMul ~ (CharIn("+-").! ~/ divMul).rep).map(transform)
+    lazy val equal: P[Expr] = P(addSub ~ ("=".! ~/ addSub).rep).map(transform)
 
     lazy val let: P[Expr] = P("let" ~/ sp ~ identifier ~ sp ~ "=" ~ sp ~ expr ~ sp ~ "in" ~ sp ~ expr).map(e =>
       Let(e._1, e._2, e._3))
@@ -91,7 +95,7 @@ object Main {
       IfElse(e._1, e._2, e._3))
     lazy val fun = P("fun" ~/ sp ~ identifier ~ sp ~ "->" ~ sp ~ expr).map(e => Fun(e._1, e._2))
     lazy val funApply = P(simple_exp ~ "(" ~ expr ~ ")").map(e => FunApply(e._1, e._2))
-    lazy val expr: P[Expr] = P(funApply | fun | let | ifElse | addSub)
+    lazy val expr: P[Expr] = P(funApply | fun | let | ifElse | equal)
 
     def evalBinOp(expr: BinOp, env: Map[Identifier, Value]): Value = {
       val (left, right) = (eval(expr.left, env), eval(expr.right, env))
@@ -102,6 +106,7 @@ object Main {
             case Minus => Value.Integer(left.value - right.value)
             case Multiply => Value.Integer(left.value * right.value)
             case Divide => Value.Integer(left.value / right.value)
+            case Equal => Value.Boolean(left.value == right.value)
           }
         }
         case (_, _) => throw new Error("Unknown evaluated BinOp operand types: %s %s %s".format(left, expr.operator, right))
@@ -136,7 +141,7 @@ object Main {
     val Success(ast, _) = expr.parse("let x = 1+1 in let y = x+1 in 1+x*y")
     assert(eval(ast, Map()) == Value.Integer(7))
 
-    val Success(ast1, _) = expr.parse("if false then if false then 2 else 9 else if false then 9 else 10")
+    val Success(ast1, _) = expr.parse("if 1=2 then if 3=4 then 2 else 9 else if 0=1 then 9 else 10")
     val result1: Value = eval(ast1, Map())
     assert(result1 == Value.Integer(10))
 
