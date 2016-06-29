@@ -16,9 +16,11 @@ object Ast {
 
     case class Integer(value: Int) extends Value
 
-    case class Closure(fun: Fun, env: Map[Identifier, Value]) extends Value
+    case class Closure(fun: Fun, env: ClosureEnv) extends Value
 
   }
+
+  class ClosureEnv(var env: Map[Identifier, Value] = Map())
 
   sealed trait Expr
 

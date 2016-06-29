@@ -3,7 +3,7 @@ package nbl
 import nbl.Ast.Expr._
 import nbl.Ast.Operator.{Add, Divide, Equal, LessThan, Minus, Multiply}
 import nbl.Ast.Value.Closure
-import nbl.Ast.{Expr, Value}
+import nbl.Ast.{ClosureEnv, Expr, Value}
 
 /**
   * Created by nos on 6/29/16.
@@ -43,11 +43,20 @@ object Evaluator {
         else
           eval(expr.elseBranch, env)
       }
-      case (expr: Fun) => Closure(expr, env)
+      case (expr: Fun) => {
+        Closure(expr, new ClosureEnv(env))
+      }
       case (expr: FunApply) => {
-        val Closure(Fun(id, body), closureEnv) = eval(expr.fun, env)
+        val Closure(Fun(parameter, body), closureEnv) = eval(expr.fun, env)
         val arg = eval(expr.arg, env)
-        eval(body, closureEnv.updated(id, arg))
+        eval(body, closureEnv.env.updated(parameter, arg))
+      }
+      case (expr: LetRec) => {
+        val functionName = expr.identifier
+        val closureEnv = new ClosureEnv(env)
+        val closure = Closure(expr.fun, closureEnv)
+        closureEnv.env = closureEnv.env.updated(functionName, closure)
+        eval(expr.body, closureEnv.env)
       }
     }
   }

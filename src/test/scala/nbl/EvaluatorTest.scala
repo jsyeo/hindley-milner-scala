@@ -36,9 +36,9 @@ class EvaluatorTest extends FunSuite {
     assert(result == Value.Integer(10))
   }
 
-  ignore("fibonacci function") {
+  test("fibonacci function") {
     val Success(ast, _) = Parser.parse("letrec fib = fun n -> if n<2 then 1 else (fib(n-1))+(fib(n-2)) in fib(10)")
     val result: Value = Evaluator.eval(ast, Map())
-    assert(result == Value.Integer(123))
+    assert(result == Value.Integer(89))
   }
 }
