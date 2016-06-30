@@ -36,6 +36,18 @@ class EvaluatorTest extends FunSuite {
     assert(result == Value.Integer(10))
   }
 
+  test("Anonymous function application") {
+    val Success(ast, _) = Parser.parse("(fun x -> x*x)(2)")
+    val result = Evaluator.eval(ast, Map())
+    assert(result == Value.Integer(4))
+  }
+
+  test("Anonymous function application with multiple parameters") {
+    val Success(ast, _) = Parser.parse("((fun x -> fun y -> y*x)(2))(3)")
+    val result = Evaluator.eval(ast, Map())
+    assert(result == Value.Integer(6))
+  }
+
   test("fibonacci function") {
     val Success(ast, _) = Parser.parse("letrec fib = fun n -> if n<2 then 1 else (fib(n-1))+(fib(n-2)) in fib(10)")
     val result: Value = Evaluator.eval(ast, Map())

@@ -71,4 +71,16 @@ class ParserTest extends FunSuite {
     val Success(ast, _) = parsed
     assert(ast == FunApply(Identifier("f"), FunApply(Identifier("g"), Identifier("x"))))
   }
+
+  test("Anonymous function application") {
+    val parsed = Parser.parse("(fun x -> x*x)(2)")
+    val Success(ast, _) = parsed
+    assert(ast == FunApply(Fun(Identifier("x"), BinOp(Multiply, Identifier("x"), Identifier("x"))), Integer(2)))
+  }
+
+  test("Anonymous function application with multiple parameters") {
+    val parsed = Parser.parse("((fun x -> fun y -> y*x)(2))(3)")
+    val Success(ast, _) = parsed
+    assert(ast == FunApply(FunApply(Fun(Identifier("x"),Fun(Identifier("y"),BinOp(Multiply,Identifier("y"),Identifier("x")))),Integer(2)),Integer(3)))
+  }
 }
