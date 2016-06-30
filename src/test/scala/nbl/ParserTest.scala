@@ -14,7 +14,6 @@ class ParserTest extends FunSuite {
     assert(ast == BinOp(Add, Integer(4), BinOp(Multiply, Integer(3), Integer(2))))
   }
 
-
   test("Add operation with parens") {
     val Success(ast, _) = Parser.parse("1+(4+5)+(1+1)")
     assert(ast == BinOp(Add, BinOp(Add, Integer(1), BinOp(Add,Integer(4),Integer(5))),

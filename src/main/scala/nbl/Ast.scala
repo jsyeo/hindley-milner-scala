@@ -7,7 +7,6 @@ import nbl.Ast.Expr.{Fun, Identifier}
   */
 object Ast {
 
-
   sealed trait Value
 
   object Value {
