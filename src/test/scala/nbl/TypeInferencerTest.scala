@@ -1,8 +1,9 @@
 package nbl
 
 import fastparse.core.Parsed.Success
+import nbl.Ast.Value
 import nbl.Type.TypeVar
-import org.scalatest.{FunSuite}
+import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 
 /**
@@ -119,6 +120,12 @@ class TypeInferencerTest extends FunSuite {
     val Success(ast, _) = Parser.parse("((fun x -> fun y -> x*y)(2))(3)")
     val typ = TypeInferencer.infer(ast)
     assert(typ == Type.Integer)
+  }
+
+  test("Recursive function inference") {
+    val Success(ast, _) = Parser.parse("letrec fib = fun n -> if n<2 then 1 else (fib(n-1))+(fib(n-2)) in fib")
+    val typ = TypeInferencer.infer(ast)
+    assert(typ == Type.Fun(Type.Integer, Type.Integer))
   }
 
   test("freshTypeVar id increment") {

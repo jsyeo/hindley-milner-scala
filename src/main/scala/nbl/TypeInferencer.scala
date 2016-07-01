@@ -117,6 +117,13 @@ object TypeInferencer {
           val Answer(argType, argSubs) = inner(expr.arg, typeEnv, funSubs)
           val unifiedSubs = unify(funType, Fun(argType, resultType), argSubs, expr)
           Answer(resultType, unifiedSubs)
+        case (expr: LetRec) =>
+          val resultType = freshTypeVar()
+          val paramType = freshTypeVar()
+          val bodyTypeEnv = typeEnv.updated(expr.identifier, Type.Fun(paramType, resultType))
+          val Answer(funBodyType, funBodySubs) = inner(expr.fun.body, bodyTypeEnv.updated(expr.fun.parameter, paramType), subs)
+          val unifiedSubs = unify(funBodyType, resultType, funBodySubs, expr.fun)
+          inner(expr.body, bodyTypeEnv, unifiedSubs)
       }
     }
 
