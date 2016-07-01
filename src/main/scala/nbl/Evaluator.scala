@@ -27,7 +27,7 @@ object Evaluator {
     }
   }
 
-  def eval(expr: Expr, env: Map[Identifier, Value]): Value = {
+  def eval(expr: Expr, env: Map[Identifier, Value] = Map()): Value = {
     expr match {
       case (expr: BinOp) => evalBinOp(expr, env)
       case (expr: Let) => eval(expr.body, env.updated(expr.identifier, eval(expr.expr, env)))
