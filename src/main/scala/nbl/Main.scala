@@ -1,6 +1,6 @@
 package nbl
 
-import nbl.Ast.{Expr, Value}
+import nbl.Ast.Expr
 
 import scala.tools.jline.console.ConsoleReader
 
