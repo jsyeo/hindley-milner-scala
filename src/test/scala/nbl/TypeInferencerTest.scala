@@ -128,10 +128,4 @@ class TypeInferencerTest extends FunSuite {
     assert(typ == Type.Fun(Type.Integer, Type.Integer))
   }
 
-  test("freshTypeVar id increment") {
-    val TypeVar(id) = TypeInferencer.freshTypeVar()
-    val TypeVar(id1) = TypeInferencer.freshTypeVar()
-    assert(id + 1 == id1)
-  }
-
 }

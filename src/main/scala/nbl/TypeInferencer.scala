@@ -59,18 +59,17 @@ object TypeInferencer {
     }
   }
 
-
-  val freshTypeVar = (() => {
-    // Hidden side effect! YAY!
-    var counter = 0
-    () => {
-      val res = counter
-      counter += 1
-      TypeVar(res)
-    }
-  }) ()
-
   def infer(expr: Expr): Type = {
+    val freshTypeVar = (() => {
+      // Hidden side effect! YAY!
+      var counter = 0
+      () => {
+        val res = counter
+        counter += 1
+        TypeVar(res)
+      }
+    }) ()
+
     def inferBinOp(binOp: BinOp, typeEnv: Map[Expr, Type], subs: Substitution): Answer = {
       val Answer(leftType, leftSubs) = inner(binOp.left, typeEnv, subs)
       binOp.operator match {
