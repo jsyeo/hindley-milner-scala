@@ -82,4 +82,16 @@ class ParserTest extends FunSuite {
     val Success(ast, _) = parsed
     assert(ast == FunApply(FunApply(Fun(Identifier("x"),Fun(Identifier("y"),BinOp(Multiply,Identifier("y"),Identifier("x")))),Integer(2)),Integer(3)))
   }
+
+  test("Empty record literal") {
+    val parsed = Parser.parse("{}")
+    val Success(ast, _) = parsed
+    assert(ast == Record(List()))
+  }
+
+  test("Non-empty record literal") {
+    val parsed = Parser.parse("{x: 1, y: 2}")
+    val Success(ast, _) = parsed
+    assert(ast == Record(List(Field("x",Integer(1)), Field("y",Integer(2)))))
+  }
 }
