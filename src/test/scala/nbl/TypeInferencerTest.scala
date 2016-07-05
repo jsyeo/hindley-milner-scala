@@ -2,7 +2,8 @@ package nbl
 
 import fastparse.core.Parsed.Success
 import nbl.Ast.Value
-import nbl.Type.TypeVar
+import nbl.Type.{Record, TypeVar}
+import nbl.TypeInferencer.RewriteResult
 import org.scalatest.FunSuite
 import org.scalatest.Matchers._
 
@@ -128,4 +129,18 @@ class TypeInferencerTest extends FunSuite {
     assert(typ == Type.Fun(Type.Integer, Type.Integer))
   }
 
+  test("Rewrite") {
+    val toRewrite = Record(List(("y", Type.Integer), ("x", Type.Integer)), TypeVar(-1))
+    assert(TypeInferencer.rewriteRow(toRewrite, "x") ==
+      RewriteResult(
+        Type.Integer,
+        Record(List(("y", Type.Integer)),
+        TypeVar(-1)), Map()))
+
+    assert(TypeInferencer.rewriteRow(toRewrite, "z") ==
+      RewriteResult(
+        TypeVar(1),
+        TypeVar(0),
+        Map(TypeVar(-1) -> Record(List(("z", TypeVar(1))), TypeVar(0)))))
+  }
 }
