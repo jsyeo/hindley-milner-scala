@@ -21,6 +21,8 @@ object Type {
 
   case class TypeVar(id: Int) extends Type
 
+  case class Record(fields: List[(String, Type)]) extends Type
+
 }
 
 object TypeInferencer {

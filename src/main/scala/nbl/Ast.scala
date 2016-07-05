@@ -43,6 +43,11 @@ object Ast {
 
     case class LetRec(identifier: Identifier, fun: Fun, body: Expr) extends Expr
 
+    case class Record(fields: List[Field]) extends Expr
+
+    // Fields are not expressions
+    case class Field(label: Identifier, expr: Expr)
+
   }
 
   sealed trait Operator
