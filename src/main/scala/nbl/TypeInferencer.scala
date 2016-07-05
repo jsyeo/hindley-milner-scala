@@ -4,6 +4,7 @@ import nbl.Ast.Expr
 import nbl.Type.{Fun, TypeVar}
 import nbl.Ast.Expr._
 import nbl.Ast.Operator._
+import Type.Record
 
 /**
   * Created by nos on 6/30/16.
@@ -21,7 +22,7 @@ object Type {
 
   case class TypeVar(id: Int) extends Type
 
-  case class Record(fields: List[(String, Type)]) extends Type
+  case class Record(fields: List[(String, Type)], row: TypeVar) extends Type
 
 }
 
@@ -61,17 +62,36 @@ object TypeInferencer {
     }
   }
 
-  def infer(expr: Expr): Type = {
-    val freshTypeVar = (() => {
-      // Hidden side effect! YAY!
-      var counter = 0
-      () => {
-        val res = counter
-        counter += 1
-        TypeVar(res)
-      }
-    }) ()
+  case class RewriteResult(newValue: Type, newRow: Type, substitution: Substitution)
 
+  def rewriteRow(record: Type, label: String): RewriteResult = {
+    val Record(fields, row) = record
+    val (initial, tail) = fields.span {
+      case (l, _) => l != label
+    }
+    if (tail.isEmpty) {
+      // Not found
+      val newRow = freshTypeVar()
+      val newValue = freshTypeVar()
+      RewriteResult(newValue, newRow, Map(row -> Record(List((label, newValue)), newRow)))
+    } else {
+      // Found
+      val (_, value) = tail.head
+      RewriteResult(value, Record(initial ++ tail.tail, row), Map())
+    }
+  }
+
+  val freshTypeVar = (() => {
+    // Hidden side effect! YAY!
+    var counter = 0
+    () => {
+      val res = counter
+      counter += 1
+      TypeVar(res)
+    }
+  }) ()
+
+  def infer(expr: Expr): Type = {
     def inferBinOp(binOp: BinOp, typeEnv: Map[Expr, Type], subs: Substitution): Answer = {
       val Answer(leftType, leftSubs) = inner(binOp.left, typeEnv, subs)
       binOp.operator match {

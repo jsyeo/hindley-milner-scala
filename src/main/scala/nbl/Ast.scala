@@ -46,8 +46,7 @@ object Ast {
     case class Record(fields: List[Field]) extends Expr
 
     // Fields are not expressions
-    case class Field(label: Identifier, expr: Expr)
-
+    case class Field(label: String, expr: Expr)
   }
 
   sealed trait Operator
