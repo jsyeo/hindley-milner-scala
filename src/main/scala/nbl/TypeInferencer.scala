@@ -55,7 +55,7 @@ object TypeInferencer {
       case (type1: Fun, type2: Fun) =>
         val unifiedSubs = unify(type1.parameter, type2.parameter, subs, expr)
         unify(type1.result, type2.result, unifiedSubs, expr)
-      case _ => throw new Error(s"Unable to unify $subed1 and $subed2 in the $expr expression")
+      case _ => throw new Error(s"Type error: Unable to unify $subed1 and $subed2")
     }
   }
 
