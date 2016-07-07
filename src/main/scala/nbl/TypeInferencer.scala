@@ -59,6 +59,14 @@ object TypeInferencer {
     }
   }
 
+  /**
+    * Substitutes identifier with replaceTo in letBody. This is used for making copies of replaceTo in letBody so as to
+    * infer a polymorphic type for replaceTo.
+    * @param identifier The identifier to substitute for
+    * @param replaceTo The expression to replace to
+    * @param letBody The let body expression to perform the substitution on
+    * @return A letBody expression with identifier substituted
+    */
   def substituteLetBody(identifier: Identifier, replaceTo: Expr, letBody: Expr): Expr = {
     def inner(expr: Expr): Expr = expr match {
       case Integer(_) | Boolean(_) => expr
@@ -138,6 +146,7 @@ object TypeInferencer {
         case (expr: Identifier) => Answer(typeEnv.get(expr).get, subs)
         case (expr: Let) =>
           val Answer(boundType, boundSubs) = inner(expr.expr, typeEnv, subs)
+          // For let-polymorphism
           val newBody: Expr = substituteLetBody(expr.identifier, expr.expr, expr.body)
           inner(newBody, typeEnv.updated(expr.identifier, boundType), boundSubs)
         case (expr: Expr.Fun) =>
