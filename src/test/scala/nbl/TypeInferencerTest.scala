@@ -128,4 +128,9 @@ class TypeInferencerTest extends FunSuite {
     assert(typ == Type.Fun(Type.Integer, Type.Integer))
   }
 
+  test("Let polymorphism") {
+    val Success(ast, _) = Parser.parse("let id = fun x -> x in if id(true) then id(1) else 42")
+    val typ = TypeInferencer.infer(ast)
+    assert(typ == Type.Integer)
+  }
 }

@@ -1,9 +1,9 @@
 package nbl
 
 import nbl.Ast.Expr
-import nbl.Type.{Fun, TypeVar}
 import nbl.Ast.Expr._
 import nbl.Ast.Operator._
+import nbl.Type.{Fun, TypeVar}
 
 /**
   * Created by nos on 6/30/16.
@@ -59,6 +59,39 @@ object TypeInferencer {
     }
   }
 
+  def substituteLetBody(identifier: Identifier, replaceTo: Expr, letBody: Expr): Expr = {
+    def inner(expr: Expr): Expr = expr match {
+      case Integer(_) | Boolean(_) => expr
+      case Identifier(_) => if (expr == identifier) replaceTo else expr
+      case BinOp(op, left, right) => BinOp(op, inner(left), inner(right))
+      case IfElse(cond, thenBranch, elseBranch) => IfElse(inner(cond), inner(thenBranch), inner(elseBranch))
+      case Let(letIdent, boundExpr, innerLetBody) => {
+        val boundExprReplaced: Expr = inner(boundExpr)
+        if (letIdent != identifier)
+          Let(letIdent, boundExprReplaced, inner(innerLetBody))
+        else
+          Let(letIdent, boundExprReplaced, letIdent)
+      }
+      case Expr.Fun(param, body) => {
+        if (param != identifier)
+          Expr.Fun(param, inner(body))
+        else
+          expr
+      }
+      case FunApply(fun, arg) => FunApply(inner(fun), inner(arg))
+      case LetRec(letRecIdent, fun, body) => {
+        if (letRecIdent != identifier)
+          inner(fun) match {
+            case fun@Expr.Fun(_, _) => LetRec(letRecIdent, fun, inner(body))
+            case _ => throw new Error("LetRec is not substituted with a function")
+          }
+        else
+          expr
+      }
+    }
+    inner(letBody)
+  }
+
   def infer(expr: Expr): Type = {
     val freshTypeVar = (() => {
       // Hidden side effect! YAY!
@@ -105,7 +138,8 @@ object TypeInferencer {
         case (expr: Identifier) => Answer(typeEnv.get(expr).get, subs)
         case (expr: Let) =>
           val Answer(boundType, boundSubs) = inner(expr.expr, typeEnv, subs)
-          inner(expr.body, typeEnv.updated(expr.identifier, boundType), boundSubs)
+          val newBody: Expr = substituteLetBody(expr.identifier, expr.expr, expr.body)
+          inner(newBody, typeEnv.updated(expr.identifier, boundType), boundSubs)
         case (expr: Expr.Fun) =>
           val paramType = freshTypeVar()
           val Answer(resultType, resultSubs) = inner(expr.body, typeEnv.updated(expr.parameter, paramType), subs)
