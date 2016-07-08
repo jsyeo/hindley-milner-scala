@@ -72,8 +72,13 @@ object Main {
           case Type.Integer => ("int", typeVars, counter)
           case Type.Boolean => ("bool", typeVars, counter)
           case typ@Type.TypeVar(_) =>
-            val typeVar: String = "'" + (typeVars.getOrElse(typ, counter) + 97).toChar.toString
-            (typeVar, typeVars.updated(typ, counter), counter + 1)
+            if (typeVars.contains(typ)) {
+              val typeVar: String = "'" + (typeVars.get(typ).get + 97).toChar.toString
+              (typeVar, typeVars, counter)
+            } else {
+              val typeVar: String = "'" + (counter + 97).toChar.toString
+              (typeVar, typeVars.updated(typ, counter), counter + 1)
+            }
           case Type.Fun(parameter, result) =>
             val (param, paramTypeVars, paramCounter) = inner(parameter, typeVars, counter)
             val (res, resTypeVars, resCounter) = inner(result, paramTypeVars, paramCounter)
