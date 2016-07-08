@@ -30,6 +30,7 @@ object Main {
 
   def read(): Option[Expr] = {
     val line: String = consoleReader.readLine("nbl> ")
+    if (line == null) System.exit(0)
     if (line.trim.isEmpty) None
     else {
       try {
