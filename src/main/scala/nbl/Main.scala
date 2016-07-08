@@ -20,10 +20,7 @@ object Main {
       def |>[U](f: T => U) = f(x)
     }
 
-    def loop(): Unit = {
-      read |> infer |> eval |> print;
-      loop
-    }
+    def loop(): Unit = { read |> infer |> eval |> print; loop }
 
     loop()
   }
